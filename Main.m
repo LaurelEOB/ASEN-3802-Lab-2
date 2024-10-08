@@ -2,7 +2,7 @@ close all; clear; clc;
 
 d_rod = 1*0.0254; % Diameter of rod, 1m
 A_rod = 2*pi*d_rod/2; % Cross section of the rod, m^2
-k = [130,130,115,115,16.2] % Thermal Conductivity (k) [W/(m*K)];
+k = [130,130,115,115,16.2]; % Thermal Conductivity (k) [W/(m*K)];
 
 Alum21V = readtable("Aluminum_21V_203mA.csv");
 Alum30V = readtable("Aluminum_30V_290mA.csv");
