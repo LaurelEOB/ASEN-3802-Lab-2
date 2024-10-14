@@ -7,6 +7,7 @@ close all;
 d_rod = 1*0.0254; % Diameter of rod, [m]
 A_rod = 2*pi*d_rod/2; % Cross section of the rod, [m^2]
 k = [130,130,115,115,16.2]; % Thermal Conductivity (k) [W/(m*K)]=[W/(m*C)];
+Thermocouple_Err = 2; % Error in the thermocouples.
 
 filename(1) = "Aluminum_21V_203mA.csv";
 filename(2) = "Aluminum_30V_290mA.csv";
@@ -49,6 +50,9 @@ for i=1:length(filename)
     
     plot(pos_therm./0.0254,ys)
     scatter(pos_therm./0.0254,initialStates(i,2:end))
+    plot(pos_therm./0.0254,initialStates(i,2:end)+Thermocouple_Err, LineStyle="--", Color=[1,0,0])
+    plot(pos_therm./0.0254,initialStates(i,2:end)-Thermocouple_Err, LineStyle="--", Color=[1,0,0])
+
     ylim([0,25])
     % Titling Plots
     if (i==1 || i==2)
@@ -60,12 +64,12 @@ for i=1:length(filename)
         curr = titleFile(1,11:13); % [mA]
         title(titleFile(1,1:5)+" "+volt+"V, "+curr+"mA");
     end
-    xlabel("distance [in]");
-    ylabel("temperature ["+char(176)+"C]")
+    xlabel("Distance [in]");
+    ylabel("Temperature ["+char(176)+"C]")
 end
 
 ax = nexttile(1);
-leg = legend("LinearFit","Experimental");
+leg = legend("LinearFit","Experimental","Thermocouple Error");
 %leg.Position = [50,50,50,100];
 leg.Layout.Tile = 6;
 
