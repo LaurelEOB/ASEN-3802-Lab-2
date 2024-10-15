@@ -58,11 +58,11 @@ for i=1:length(filename)
     if (i==1 || i==2)
         volt = titleFile(1,10:11); % [V]
         curr = titleFile(1,14:16); % [mA]
-        title(titleFile(1,1:8)+" "+volt+"V, "+curr+"mA");
+        title(titleFile(1,1:8)+" "+volt+"V, "+curr+"mA",'FontSize',14);
     else
         volt = titleFile(1,7:8); % [V]
         curr = titleFile(1,11:13); % [mA]
-        title(titleFile(1,1:5)+" "+volt+"V, "+curr+"mA");
+        title(titleFile(1,1:5)+" "+volt+"V, "+curr+"mA",'FontSize',14);
     end
     xlabel("Distance [m]",'FontSize',14);
     ylabel("Temperature ["+char(176)+"C]",'FontSize',14)
