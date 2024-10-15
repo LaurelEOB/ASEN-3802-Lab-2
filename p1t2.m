@@ -22,11 +22,11 @@ pos_therm = linspace(x_0,x_0+(8*spacing),8); % [inches]
 initialStates = zeros([5,9]);
 M_exp = zeros(5,1);
 
-figure('Position',[100,50,1.25*1080,1.25*760])
+figure('Position',[40 60 1100 700])
 t = tiledlayout(2,3);
 t.TileSpacing ="compact";
 t.Padding = 'compact';
-title(t,"Initial Temperature Gradient")
+title(t,"Initial Temperature Gradient",'FontSize',16)
 
 %% Go through each file
 for i=1:length(filename)
@@ -48,10 +48,10 @@ for i=1:length(filename)
     grid on;
     grid minor;
     
-    plot(pos_therm./0.0254,ys)
-    scatter(pos_therm./0.0254,initialStates(i,2:end))
-    plot(pos_therm./0.0254,initialStates(i,2:end)+Thermocouple_Err, LineStyle="--", Color=[1,0,0])
-    plot(pos_therm./0.0254,initialStates(i,2:end)-Thermocouple_Err, LineStyle="--", Color=[1,0,0])
+    plot(pos_therm,ys,'b',LineWidth=2)
+    scatter(pos_therm,initialStates(i,2:end),25,'r','filled')
+    plot(pos_therm,initialStates(i,2:end)+Thermocouple_Err,"--r", Color=[1,0,0])
+    plot(pos_therm,initialStates(i,2:end)-Thermocouple_Err,"--r", Color=[1,0,0])
 
     ylim([0,25])
     % Titling Plots
@@ -64,12 +64,12 @@ for i=1:length(filename)
         curr = titleFile(1,11:13); % [mA]
         title(titleFile(1,1:5)+" "+volt+"V, "+curr+"mA");
     end
-    xlabel("Distance [in]");
-    ylabel("Temperature ["+char(176)+"C]")
+    xlabel("Distance [m]",'FontSize',14);
+    ylabel("Temperature ["+char(176)+"C]",'FontSize',14)
 end
 
 ax = nexttile(1);
-leg = legend("LinearFit","Experimental","Thermocouple Error");
+leg = legend("M_{exp}","Thermocouple Measurement","Thermocouple Error",'FontSize',13);
 %leg.Position = [50,50,50,100];
 leg.Layout.Tile = 6;
 
