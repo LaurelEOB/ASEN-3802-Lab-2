@@ -4,6 +4,9 @@ close all; clear; clc;
 d_rod = 1*0.0254; % Diameter of rod, [m]
 A_rod = pi*(d_rod^2)/4; % Cross section of the rod, [m^2]
 k = [130,130,115,115,16.2]; % Thermal Conductivity (k) [W/(m*K)]=[W/(m*C)];
+rho = [2810, 2810, 8500, 8500, 8000]; % Density [kg/m^3]
+c_p = [960, 960, 380, 380, 500]; % Specific Heat Capacity [J/(kg*K)]
+L = (6+(9/8))*0.0254; % Length of rod
 
 filename(1) = "Aluminum_21V_203mA.csv";
 filename(2) = "Aluminum_30V_290mA.csv";
@@ -16,9 +19,10 @@ t2 = tiledlayout(2,3);
 t2.Padding = 'compact';
 title(t2,"Steady State Temperatures along the Rod",'FontSize',16);
 
-
+%% Part 1
 %% Go through each file
 for i=1:length(filename)
+    alpha(i) = k(i) / rho(i) / c_p(i);
     figure(1);
     nexttile; hold on; grid on; grid minor;
     %set(gca,"ColorOrder",parula(16))
@@ -63,8 +67,30 @@ for i=1:length(filename)
     plot(pos_therm,H_exp(i)*pos_therm+Coeff(2)+2,'--r',LineWidth=1);
     plot(pos_therm,H_exp(i)*pos_therm+Coeff(2)-2,'--r',LineWidth=1);
     plot(pos_therm,H_an(i)*pos_therm+Coeff(2),'b',LineWidth=2);
+
+
+   
 end
 ax = nexttile(1);
 lg  = legend('Experimental Data','H_e_x_p (Experimental Slope)','Thermocouple error','','H_a_n (Analytical Slope)','Orientation','Vertical','FontSize',13);
 lg.Layout.Tile = 6;
+
+
+%% Part 2
+% Task 1
+
+% H_an(1)
+% T_0(1)
+% alpha(1)
+x_pos = pos_therm(end);
+
+function u = u_of_x(x,L,H,a,t)
+    total = 0;
+    for n=0:10
+        lambda = (2*n-1)*pi/(2*L)
+        b_n = 4*H*L*pi * ( (pi*(2*n-1)*sin(pi*n)) + (2*cos(pi*n))   ) / ((pi - (2*pi*n))^2)
+        total = total + b_n * sin (lambda_n * x) * e^(-(lambda^2)*a*t)
+
+    end
+end
 
