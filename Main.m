@@ -56,6 +56,10 @@ for i=1:length(filename)
     pos_therm = linspace(x_0,x_0+(8*spacing),8); % [m]
     scatter(pos_therm,T_F,25,'r','filled');
     
+    T_init = testData(1,2:end);
+    Coeff2 = polyfit(pos_therm,T_init, 1);
+    H_m(i) = Coeff2(1);
+    
     Coeff = polyfit(pos_therm,T_F,1);
     H_exp(i) = Coeff(1); % [C/m]
     T_0(i) = Coeff(2); % [C]
@@ -81,9 +85,9 @@ lg.Layout.Tile = 6;
 figure('Position', [40 60 600 300]); hold on; grid on; grid minor;
 
 u1 = transientTemp_n(pos_therm(end), 1, T_0(1), H_an(1), L, k(1), rho(1), c_p(1), 10);
-plot(linspace(0,10,11),u1,LineWidth=2);
+plot(linspace(0,10,11),u1,'.',LineWidth=6);
 u2 = transientTemp_n(pos_therm(end), 1000, T_0(1), H_an(1), L, k(1), rho(1), c_p(1), 10);
-plot(linspace(0,10,11),u2,LineWidth=2);
+plot(linspace(0,10,11),u2,".",LineWidth=6);
 title({"Temperature at End of Aluminum 21V Rod"," General Solution Computed with Different N Values"})
 xlabel("n value",'FontSize',14);
 ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
@@ -106,8 +110,6 @@ for i=1:length(filename)
 
     rawData = importdata(filename(i));
     testData = rawData.data;
-
-    
     
     if (i==1 || i==2)
         titleArray = titleFile(1,1:8)+" "+volt+"V, "+curr+"mA";
@@ -119,10 +121,11 @@ for i=1:length(filename)
     xlabel("Time [min]",'FontSize',14);
     ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
     title({titleArray,"Model 1A: H_a_n"},'FontSize',14);
-    timeArray = linspace(0,testData(end,1),921);
-    u3 = transientTemp(pos_therm,timeArray,T_0(i),H_an(i),L,k(i),rho(i),c_p(i),5);
-    plot(timeArray/60, u3,'-',"LineWidth",1.5);
+    u3 = transientTemp(pos_therm,testData(:,1),T_0(i),H_an(i),L,k(i),rho(i),c_p(i),10);
+    plot(testData(:,1)/60, u3,'-',"LineWidth",1.5);
     plot(testData(:,1)/60,testData(:,2:end),'--',"LineWidth",1.5)
+
+   
     ax1 = gca;
     myColors1 = summer(13);
     myColors2 = winter(40);
@@ -134,70 +137,82 @@ for i=1:length(filename)
     xlabel("Time [min]",'FontSize',14);
     ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
     title({titleArray,"Model 1B: H_e_x_p"},'FontSize',14);
-    u4 = transientTemp(pos_therm,timeArray,T_0(i),H_exp(i),L,k(i),rho(i),c_p(i),5);
-    plot(timeArray/60, u3,'-',"LineWidth",1.5);
+    u4 = transientTemp(pos_therm,testData(:,1),T_0(i),H_exp(i),L,k(i),rho(i),c_p(i),10);
+    plot(testData(:,1)/60, u4,'-',"LineWidth",1.5);
     plot(testData(:,1)/60,testData(:,2:end),'--',"LineWidth",1.5)
     ax2 = gca;
     myColors1 = cool(30);
     myColors2 = winter(40);
     myColors = [myColors1(18:25,:);myColors2(15:23,:)];
     ax2.ColorOrder = myColors;
-    legend("Exp Th_1","Exp Th_2","Exp Th_3","Exp Th_4","Exp Th_5","Exp Th_6","Exp Th_7","Exp Th_8","H_e_x_p Th_1","H_e_x_p Th_2","H_e_x_p Th_3","H_e_x_p Th_4","H_e_x_p Th_5","H_e_x_p Th_6","H_e_x_p Th_7","H_e_x_p Th_8","NumColumns",2,"location",'eastoutside');
+    legend("H_e_x_p Th_1","H_e_x_p Th_2","H_e_x_p Th_3","H_e_x_p Th_4","H_e_x_p Th_5","H_e_x_p Th_6","H_e_x_p Th_7","H_e_x_p Th_8","Exp Th_1","Exp Th_2","Exp Th_3","Exp Th_4","Exp Th_5","Exp Th_6","Exp Th_7","Exp Th_8","NumColumns",2,"location",'eastoutside');
 
 
+    figure('Position', [40 60 1000 400]); hold on; grid on; grid minor;
+    xlabel("Time [min]",'FontSize',14);
+    ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
+    title({titleArray,"Model II: (M-H)x"},'FontSize',14);
+    u4 = transientTemp_Hm(pos_therm,testData(:,1),T_0(i),H_exp(i),H_m(i),L,k(i),rho(i),c_p(i),10);
+    plot(testData(:,1)/60, u4,'-',"LineWidth",1.5);
+    plot(testData(:,1)/60,testData(:,2:end),'--',"LineWidth",1.5)
+    ax2 = gca;
+    myColors1 = hot(30);
+    myColors2 = winter(40);
+    myColors = [myColors1(7:14,:);myColors2(15:23,:)];
+    ax2.ColorOrder = myColors;
+    legend("H_e_x_p Th_1","H_e_x_p Th_2","H_e_x_p Th_3","H_e_x_p Th_4","H_e_x_p Th_5","H_e_x_p Th_6","H_e_x_p Th_7","H_e_x_p Th_8","Exp Th_1","Exp Th_2","Exp Th_3","Exp Th_4","Exp Th_5","Exp Th_6","Exp Th_7","Exp Th_8","NumColumns",2,"location",'eastoutside');
    
 end
 
 % This version of the function is for plotting u as n changes at a single x
 % and t value. Used for p2t1.
 function u = transientTemp_n(x,t,T_0,H,L,k,rho,c_p,n_max)
-total = 0; % Sets the initial transient state term (n=0) to be 0
-alpha = k./(rho.*c_p); % Gets alpha
-u = zeros(1,n_max+1); % Pre-allocates u for speed
-u(1) = T_0 + H.*x; % Establishes n=0 as the steady state case.
-for n = 1:n_max % Loops through values of n
-    n;
-    lambda = ((2.*n-1)*pi)./(2.*L); % Calculates lambda
-    % The below calculates b
-    if mod(n,2) == 0 % If n is even
-        b = (8.*H.*L)./((2.*n-1).^2.*pi.^2);
-    else
-        b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
+    total = 0; % Sets the initial transient state term (n=0) to be 0
+    alpha = k./(rho.*c_p); % Gets alpha
+    u = zeros(1,n_max+1); % Pre-allocates u for speed
+    u(1) = T_0 + H.*x; % Establishes n=0 as the steady state case.
+    for n = 1:n_max % Loops through values of n
+        n;
+        lambda = ((2.*n-1)*pi)./(2.*L); % Calculates lambda
+        % The below calculates b
+        if mod(n,2) == 0 % If n is even
+            b = (8.*H.*L)./((2.*n-1).^2.*pi.^2);
+        else
+            b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
+        end
+        % Updates the sum for each value of n
+        total = total + b.*sin(lambda.*x).*exp(-1.*lambda.^2.*alpha.*t);
+        % Gives a u value for each value of n
+        u(n+1) = T_0 + H.*x + total;
     end
-    % Updates the sum for each value of n
-    total = total + b.*sin(lambda.*x).*(exp(-1.*lambda.^2.*alpha.*t))';
-    % Gives a u value for each value of n
-    u(n+1) = T_0 + H.*x + total;
-end
 
 end
 
 
 % This version of the function is for plotting u as x and t change, with a fixed value of n_max. Used for p2t2.
 function u = transientTemp(x,t,T_0,H,L,k,rho,c_p,n_max)
-total = zeros(length(t),length(x)); % Sets the initial transient state term (n=0) to be 0
-alpha = k./(rho.*c_p); % Gets alpha
-u = zeros(length(t),length(x)); % Pre-allocates u for speed
-%u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
-for n = 1:n_max % Loops through values of n
-    n;
-    lambda = ((2.*n-1)*pi)./(2.*L); % Calculates lambda
-    % The below calculates b
-    if mod(n,2) == 0 % If n is even
-        b = (8.*H.*L)./((2.*n-1).^2.*pi.^2);
-    else
-        b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
+    total = zeros(length(t),length(x)); % Sets the initial transient state term (n=0) to be 0
+    alpha = k./(rho.*c_p); % Gets alpha
+    u = zeros(length(t),length(x)); % Pre-allocates u for speed
+    %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
+    for n = 1:n_max % Loops through values of n
+        n;
+        lambda = ((2.*n-1)*pi)./(2.*L); % Calculates lambda
+        % The below calculates b
+        if mod(n,2) == 0 % If n is even
+            b = (8.*H.*L)./((2.*n-1).^2.*pi.^2);
+        else
+            b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
+        end
+        % Updates the sum for each value of n
+        total = total + b.*sin(lambda.*x).*exp(-1.*lambda.^2.*alpha.*t);
+        % Gives a u value for each value of n
+        
     end
-    % Updates the sum for each value of n
-    total = total + b.*sin(lambda.*x).*(exp(-1.*lambda.^2.*alpha.*t))';
-    % Gives a u value for each value of n
-    
+    % Adds the transient values for each x and t. 
+    u(1:end,:) = T_0 + H.*x + total;
+    %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
-% Adds the transient values for each x and t. 
-u(1:end,:) = T_0 + H.*x + total;
-%u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
-end
-
 
 % This version of the function is for plotting u as x and t change, with a fixed value of n_max, but accounts for an initial T gradient. Used for p2t4.
 function u = transientTemp_Hm(x,t,T_0,H,Hm,L,k,rho,c_p,n_max)
@@ -223,4 +238,3 @@ end
 u(1:end,:) = T_0 + H.*x + total;
 %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
-
