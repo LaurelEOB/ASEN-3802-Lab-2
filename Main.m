@@ -78,11 +78,75 @@ lg.Layout.Tile = 6;
 
 %% Part 2
 % Task 1
+figure('Position', [40 60 600 300]); hold on; grid on; grid minor;
 
-% H_an(1)
-% T_0(1)
-% alpha(1)
-x_pos = pos_therm(end);
+u1 = transientTemp_n(pos_therm(end), 1, T_0(1), H_an(1), L, k(1), rho(1), c_p(1), 10);
+plot(linspace(0,10,11),u1,LineWidth=2);
+u2 = transientTemp_n(pos_therm(end), 1000, T_0(1), H_an(1), L, k(1), rho(1), c_p(1), 10);
+plot(linspace(0,10,11),u2,LineWidth=2);
+title({"Temperature at End of Aluminum 21V Rod"," General Solution Computed with Different N Values"})
+xlabel("n value",'FontSize',14);
+ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
+legend("t = 1s","t = 1000s",'Location','best');
+
+hold off;
+
+% Task 2
+for i=1:length(filename)
+    
+    titleFile = char (filename(i)); % Filename for the data
+    % Voltage and Current
+    if (i==1 || i==2)
+        volt = titleFile(1,10:11); % [V]
+        curr = titleFile(1,14:16); % [mA]
+    else
+        volt = titleFile(1,7:8); % [V]
+        curr = titleFile(1,11:13); % [mA]
+    end
+
+    rawData = importdata(filename(i));
+    testData = rawData.data;
+
+    
+    
+    if (i==1 || i==2)
+        titleArray = titleFile(1,1:8)+" "+volt+"V, "+curr+"mA";
+    else
+        titleArray = titleFile(1,1:5)+" "+volt+"V, "+curr+"mA";
+    end
+
+    figure('Position', [40 60 1000 400]); hold on; grid on; grid minor;
+    xlabel("Time [min]",'FontSize',14);
+    ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
+    title({titleArray,"Model 1A: H_a_n"},'FontSize',14);
+    timeArray = linspace(0,testData(end,1),921);
+    u3 = transientTemp(pos_therm,timeArray,T_0(i),H_an(i),L,k(i),rho(i),c_p(i),5);
+    plot(timeArray/60, u3,'-',"LineWidth",1.5);
+    plot(testData(:,1)/60,testData(:,2:end),'--',"LineWidth",1.5)
+    ax1 = gca;
+    myColors1 = summer(13);
+    myColors2 = winter(40);
+    myColors = [myColors1(1:8,:);myColors2(15:23,:)];
+    ax1.ColorOrder = myColors;
+    legend("Exp Th_1","Exp Th_2","Exp Th_3","Exp Th_4","Exp Th_5","Exp Th_6","Exp Th_7","Exp Th_8","H_a_n Th_1","H_a_n Th_2","H_a_n Th_3","H_a_n Th_4","H_a_n Th_5","H_a_n Th_6","H_a_n Th_7","H_a_n Th_8","NumColumns",2,"location",'eastoutside');
+
+    figure('Position', [40 60 1000 400]); hold on; grid on; grid minor;
+    xlabel("Time [min]",'FontSize',14);
+    ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
+    title({titleArray,"Model 1B: H_e_x_p"},'FontSize',14);
+    u4 = transientTemp(pos_therm,timeArray,T_0(i),H_exp(i),L,k(i),rho(i),c_p(i),5);
+    plot(timeArray/60, u3,'-',"LineWidth",1.5);
+    plot(testData(:,1)/60,testData(:,2:end),'--',"LineWidth",1.5)
+    ax2 = gca;
+    myColors1 = cool(30);
+    myColors2 = winter(40);
+    myColors = [myColors1(18:25,:);myColors2(15:23,:)];
+    ax2.ColorOrder = myColors;
+    legend("Exp Th_1","Exp Th_2","Exp Th_3","Exp Th_4","Exp Th_5","Exp Th_6","Exp Th_7","Exp Th_8","H_e_x_p Th_1","H_e_x_p Th_2","H_e_x_p Th_3","H_e_x_p Th_4","H_e_x_p Th_5","H_e_x_p Th_6","H_e_x_p Th_7","H_e_x_p Th_8","NumColumns",2,"location",'eastoutside');
+
+
+   
+end
 
 % This version of the function is for plotting u as n changes at a single x
 % and t value. Used for p2t1.
@@ -101,7 +165,7 @@ for n = 1:n_max % Loops through values of n
         b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
     end
     % Updates the sum for each value of n
-    total = total + b.*sin(lambda.*x).*exp(-1.*lambda.^2.*alpha.*t);
+    total = total + b.*sin(lambda.*x).*(exp(-1.*lambda.^2.*alpha.*t))';
     % Gives a u value for each value of n
     u(n+1) = T_0 + H.*x + total;
 end
@@ -125,7 +189,7 @@ for n = 1:n_max % Loops through values of n
         b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
     end
     % Updates the sum for each value of n
-    total = total + b.*sin(lambda.*x).*exp(-1.*lambda.^2.*alpha.*t);
+    total = total + b.*sin(lambda.*x).*(exp(-1.*lambda.^2.*alpha.*t))';
     % Gives a u value for each value of n
     
 end
@@ -133,4 +197,3 @@ end
 u(1:end,:) = T_0 + H.*x + total;
 %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
-
