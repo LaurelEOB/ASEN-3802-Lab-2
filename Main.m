@@ -238,3 +238,34 @@ end
 u(1:end,:) = T_0 + H.*x + total;
 %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
+
+alphas_adjustments = [0.9,0.9,0.8,0.8,2]; % Currently these aplhas produce best results
+
+% This version of the function Adjusts alpha in order to better match the actual data, in order to account for discrepencies caused my impurities in the metals.
+function u = transientTemp_alphas(x,t,T_0,H,L,k,rho,c_p,n_max,alpha_adjustment)
+total = zeros(length(t),length(x)); % Sets the initial transient state term (n=0) to be 0
+alpha = k./(rho.*c_p); % Gets alpha
+alpha = alpha.*alpha_adjustment;
+u = zeros(length(t),length(x)); % Pre-allocates u for speed
+%u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
+for n = 1:n_max % Loops through values of n
+    n;
+    lambda = ((2.*n-1)*pi)./(2.*L); % Calculates lambda
+    % The below calculates b
+    if mod(n,2) == 0 % If n is even
+        b = (8.*H.*L)./((2.*n-1).^2.*pi.^2);
+    else
+        b = (-8.*H.*L)./((2.*n-1).^2.*pi.^2);
+    end
+    % Updates the sum for each value of n
+    total = total + b.*sin(lambda.*x).*exp(-1.*lambda.^2.*alpha.*t);
+    % Gives a u value for each value of n
+    
+end
+% Adds the transient values for each x and t. 
+u(1:end,:) = T_0 + H.*x + total;
+%u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
+end
+
+
+
