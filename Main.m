@@ -239,7 +239,7 @@ u(1:end,:) = T_0 + H.*x + total;
 %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
 
-alphas_adjustments = [0.9,0.9,0.8,0.8,2]; % Currently these aplhas produce best results
+alphas_adjustments = [0.985,0.815,0.705,0.625,2.05];
 
 % This version of the function Adjusts alpha in order to better match the actual data, in order to account for discrepencies caused my impurities in the metals.
 function u = transientTemp_alphas(x,t,T_0,H,L,k,rho,c_p,n_max,alpha_adjustment)
