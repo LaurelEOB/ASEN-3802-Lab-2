@@ -53,7 +53,7 @@ for i=1:length(filename)
     end
     x_0 = (1+3/8)*0.0254;% Distance from x_0 to first thermocouple
     spacing = 0.5*0.0254; % Distance between thermocouples
-    pos_therm = linspace(x_0,x_0+(8*spacing),8); % [m]
+    pos_therm = linspace(x_0,x_0+(7*spacing),8); % [m]
     scatter(pos_therm,T_F,25,'r','filled');
     
     T_init = testData(1,2:end);
