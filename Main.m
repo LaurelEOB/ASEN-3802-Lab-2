@@ -8,6 +8,10 @@ rho = [2810, 2810, 8500, 8500, 8000]; % Density [kg/m^3]
 c_p = [960, 960, 380, 380, 500]; % Specific Heat Capacity [J/(kg*K)]
 L = (6+(9/8))*0.0254; % Length of rod
 
+
+alphas_adjustments = [0.985,0.815,0.705,0.625,2.05]; % Currently these aplhas produce best results
+
+
 filename(1) = "Aluminum_21V_203mA.csv";
 filename(2) = "Aluminum_30V_290mA.csv";
 filename(3) = "Brass_21V_199mA.csv";
@@ -51,7 +55,7 @@ for i=1:length(filename)
     for j=2:9
         T_F(1,j-1)=testData(end,j);
     end
-    x_0 = (1+3/8)*0.0254;% Distance from x_0 to first thermocouple
+    x_0 = (1+(3/8))*0.0254;% Distance from x_0 to first thermocouple
     spacing = 0.5*0.0254; % Distance between thermocouples
     pos_therm = linspace(x_0,x_0+(7*spacing),8); % [m]
     scatter(pos_therm,T_F,25,'r','filled');
@@ -85,9 +89,9 @@ lg.Layout.Tile = 6;
 figure('Position', [40 60 600 300]); hold on; grid on; grid minor;
 
 u1 = transientTemp_n(pos_therm(end), 1, T_0(1), H_an(1), L, k(1), rho(1), c_p(1), 10);
-plot(linspace(0,10,11),u1,'.',LineWidth=6);
+plot(linspace(0,10,11),u1,LineWidth=6);
 u2 = transientTemp_n(pos_therm(end), 1000, T_0(1), H_an(1), L, k(1), rho(1), c_p(1), 10);
-plot(linspace(0,10,11),u2,".",LineWidth=6);
+plot(linspace(0,10,11),u2,LineWidth=6);
 title({"Temperature at End of Aluminum 21V Rod"," General Solution Computed with Different N Values"})
 xlabel("n value",'FontSize',14);
 ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
@@ -164,6 +168,61 @@ for i=1:length(filename)
    
 end
 
+
+%% Part 3
+
+for i=1:length(filename)
+    
+    titleFile = char (filename(i)); % Filename for the data
+    % Voltage and Current
+    if (i==1 || i==2)
+        volt = titleFile(1,10:11); % [V]
+        curr = titleFile(1,14:16); % [mA]
+    else
+        volt = titleFile(1,7:8); % [V]
+        curr = titleFile(1,11:13); % [mA]
+    end
+
+    rawData = importdata(filename(i));
+    testData = rawData.data;
+    
+    if (i==1 || i==2)
+        titleArray = titleFile(1,1:8)+" "+volt+"V, "+curr+"mA";
+    else
+        titleArray = titleFile(1,1:5)+" "+volt+"V, "+curr+"mA";
+    end
+
+    posFinal = pos_therm(end);
+    u4 = transientTemp_Hm(pos_therm,testData(:,1),T_0(i),H_exp(i),H_m(i),L,k(i),rho(i),c_p(i),10);
+    u5 = transientTemp_alphas(pos_therm,testData(:,1),T_0(i),H_exp(i),L,k(i),rho(i),c_p(i),10,alphas_adjustments(i));
+
+    figure('Position', [40 60 1000 400]); hold on; grid on; grid minor;
+    xlabel("Time [min]",'FontSize',14);
+    ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
+    title({titleArray,"Model III: Modifying Thermal Diffusivity"},'FontSize',14);
+    u4 = transientTemp_Hm(pos_therm,testData(:,1),T_0(i),H_exp(i),H_m(i),L,k(i),rho(i),c_p(i),10);
+    plot(testData(:,1)/60, u5,'-',"LineWidth",1.5);
+    plot(testData(:,1)/60,testData(:,2:end),'--',"LineWidth",1.5)
+    ax2 = gca;
+    myColors1 = pink(30);
+    myColors2 = winter(40);
+    myColors = [myColors1(7:14,:);myColors2(15:23,:)];
+    ax2.ColorOrder = myColors;
+    legend("\alpha_a_d_j Th_1","\alpha_a_d_j Th_2","\alpha_a_d_j Th_3","\alpha_a_d_j Th_4","\alpha_a_d_j Th_5","\alpha_a_d_j Th_6","\alpha_a_d_j Th_7","\alpha_a_d_j Th_8","Exp Th_1","Exp Th_2","Exp Th_3","Exp Th_4","Exp Th_5","Exp Th_6","Exp Th_7","Exp Th_8","NumColumns",2,"location",'eastoutside');
+
+    figure('Position', [40 60 1000 400]); hold on; grid on; grid minor;
+    xlabel("Time [min]",'FontSize',14);
+    ylabel("Temperature ["+char(176)+"C]",'FontSize',14);
+    title({titleArray,"Comparing Models with Experimental"},'FontSize',14);
+    plot(testData(:,1)/60, u4(:,end),'b-',"LineWidth",1.5);
+    plot(testData(:,1)/60, u5(:,end),'g-',"LineWidth",1.5);
+    plot(testData(:,1)/60,testData(:,end),'r',"LineWidth",1.5);
+    plot(testData(:,1)/60,testData(:,end)+2,'r--',"LineWidth",1);
+    plot(testData(:,1)/60,testData(:,end)-2,'r--',"LineWidth",1);
+    legend("Model II Th_8","Model III Th_8","Experimental Th_8","Experimental Error Bounds ("+char(177)+"2"+char(176)+")","location",'eastoutside');
+end
+
+newAlphas = alphas_adjustments .* alpha;
 % This version of the function is for plotting u as n changes at a single x
 % and t value. Used for p2t1.
 function u = transientTemp_n(x,t,T_0,H,L,k,rho,c_p,n_max)
@@ -239,8 +298,6 @@ u(1:end,:) = T_0 + H.*x + total;
 %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
 
-alphas_adjustments = [0.985,0.815,0.705,0.625,2.05];
-
 % This version of the function Adjusts alpha in order to better match the actual data, in order to account for discrepencies caused my impurities in the metals.
 function u = transientTemp_alphas(x,t,T_0,H,L,k,rho,c_p,n_max,alpha_adjustment)
 total = zeros(length(t),length(x)); % Sets the initial transient state term (n=0) to be 0
@@ -266,6 +323,3 @@ end
 u(1:end,:) = T_0 + H.*x + total;
 %u(1,:) = T_0 + H.*x; % Establishes n=0 as the steady state case.
 end
-
-
-
